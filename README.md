@@ -30,5 +30,10 @@
 
 1. 克隆项目：
    ```bash
-   git clone <你的仓库地址>
+   cd <你的目录>
+    ```
+   下面推荐使用SSH方式clone，请自行配置SSH密钥
+   ```bash
+   git clone git@github.com:Aaron-zjh-coder/AI_Medical_Tragile_Front.git
+   ```
    cd <项目目录>
