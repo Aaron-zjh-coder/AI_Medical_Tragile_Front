@@ -20,6 +20,7 @@
 
 - Node.js 版本 ≥ 18（推荐使用 [nvm](https://github.com/nvm-sh/nvm) 管理 Node 版本）
 - 包管理器：推荐使用 **pnpm**（也可使用 npm 或 yarn）
+- 浏览器：除了IE都行，IE不再支持vue3
 
 > 如未安装 pnpm，可运行以下命令全局安装：
 > ```bash
