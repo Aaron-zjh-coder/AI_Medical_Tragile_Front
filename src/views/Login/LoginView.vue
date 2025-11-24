@@ -1,39 +1,56 @@
 <template>
   <div class="login-container">
-    <a-card class="login-card" title="患者登录" :bordered="false">
-      <a-form
-        :model="form"
-        :rules="rules"
-        @submit="handleSubmit"
-        layout="vertical"
-      >
-        <!-- 手机号输入 -->
-        <a-form-item field="phone" label="手机号">
-          <PhoneInput v-model="form.phone" />
-        </a-form-item>
-
-        <!-- 验证码输入 -->
-        <a-form-item field="code" label="验证码">
-          <CodeInput
-            v-model="form.code"
-            :phone="form.phone"
-            @send="handleSendCode"
+    <div class="login-card">
+      <h2 class="title">医疗导诊系统</h2>
+      <a-form :model="form" @submit="handleSubmit" layout="vertical">
+        <a-form-item
+          field="username"
+          label="账号（邮箱/手机号）"
+          :rules="[{
+            required: true,
+            message: '请输入邮箱或手机号'
+          }]"
+        >
+          <a-input
+            v-model="form.username"
+            placeholder="请输入邮箱或手机号"
+            allow-clear
           />
         </a-form-item>
 
-        <!-- 登录按钮 -->
-        <a-form-item>
-          <a-button
-            type="primary"
-            html-type="submit"
-            long
-            :loading="loading"
-          >
-            登录
-          </a-button>
+        <a-form-item
+          field="password"
+          label="密码"
+          :rules="[{
+            required: true,
+            message: '请输入密码'
+          }, {
+            minLength: 6,
+            message: '密码至少6位'
+          }]"
+        >
+          <a-input-password
+            v-model="form.password"
+            placeholder="请输入密码"
+            allow-clear
+          />
         </a-form-item>
+
+        <a-button
+          type="primary"
+          html-type="submit"
+          long
+          :loading="loading"
+          size="large"
+        >
+          登录
+        </a-button>
       </a-form>
-    </a-card>
+
+      <div class="footer-links">
+        <a-link @click="goToRegister">没有账号？去注册</a-link>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -41,52 +58,52 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import PhoneInput from '@/components/PhoneInput.vue'
-import CodeInput from '@/components/CodeInput.vue'
+import type { UserInfo } from '@/stores/auth' // ✅ type-only import
+import { Message } from '@arco-design/web-vue'
 
-// 表单数据
-const form = reactive({
-  phone: '',
-  code: ''
-})
-
-// 表单验证规则
-const rules = {
-  phone: [
-    { required: true, message: '请输入手机号' },
-    { match: /^1[3-9]\d{9}$/, message: '手机号格式不正确' }
-  ],
-  code: [
-    { required: true, message: '请输入验证码' },
-    { match: /^\d{6}$/, message: '验证码为6位数字' }
-  ]
-}
-
-// 加载状态
-const loading = ref(false)
-
-// 路由和状态管理
 const router = useRouter()
 const authStore = useAuthStore()
+const loading = ref(false)
 
-// 发送验证码（mock）
-const handleSendCode = () => {
-  console.log('发送验证码到:', form.phone)
-  // 开发环境提示真实验证码
-  alert(`验证码已发送到 ${form.phone}（开发环境 mock）\n真实验证码：123456`)
+const form = reactive({
+  username: '',
+  password: ''
+})
+
+const goToRegister = () => {
+  router.push('/register')
 }
 
-// 提交登录
 const handleSubmit = async () => {
+  const username = form.username.trim()
+  const password = form.password.trim()
+
+  if (!username || !password) {
+    Message.warning('请填写完整信息')
+    return
+  }
+
   loading.value = true
   try {
-    // 模拟 API 登录成功
-    const mockToken = 'patient_mock_token_123'
-    const mockUser = { id: '1', name: '患者用户' }
-    authStore.login(mockToken, mockUser)
-    await router.push('/chat')
+    // 安全提取 name，确保结果为 string
+    const rawName = username.includes('@')
+      ? username.split('@')[0]
+      : username
+
+    // 处理可能的 undefined / 空字符串
+    const displayName = (rawName?.trim() ?? '') || '患者'
+
+    const mockUser: UserInfo = {
+      id: 'user-' + Date.now().toString(36),
+      name: displayName // ✅ 现在是 string，不是 string | undefined
+    }
+
+    authStore.login('mock-patient-token-' + Date.now(), mockUser)
+    Message.success('登录成功！')
+    router.push('/')
   } catch (error) {
-    console.error('登录失败:', error)
+    Message.error('登录失败，请检查账号密码')
+    console.error(error)
   } finally {
     loading.value = false
   }
@@ -94,29 +111,39 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-
-/* 全屏背景 */
 .login-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-image: url('/images/login-bg.png');
-  background-size: cover;       /* 覆盖整个容器 */
-  background-position: center;  /* 居中显示 */
-  background-repeat: no-repeat; /* 不重复 */
-  background-attachment: fixed; /* 固定背景，滚动时不动 */
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  padding: 20px;
 }
 
 .login-card {
-  width: 400px;
-  background-color: rgba(255, 255, 255, 0.85); /* 半透明白色背景 */
-  backdrop-filter: blur(6px);   /* 毛玻璃效果（可选） */
+  width: 100%;
+  max-width: 400px;
+  padding: 32px;
+  background: white;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1d39c4;
+  margin-bottom: 28px;
+}
+
+.footer-links {
+  text-align: center;
+  margin-top: 20px;
+}
+
+:deep(.arco-form-item-label) {
+  font-weight: 500;
+  color: #333;
 }
 </style>

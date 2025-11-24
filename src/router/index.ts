@@ -11,6 +11,12 @@ const router = createRouter({
       meta: { guestOnly: true } // 未登录才能访问
     },
     {
+      path: '/register',
+      name: 'Register',
+      component: () => import('@/views/Register/RegisterView.vue'),
+      meta: { guestOnly: true } // 未登录才能访问
+    },
+    {
       path: '/chat',
       name: 'Chat',
       component: () => import('@/views/Chat/ChatView.vue'),
@@ -23,15 +29,12 @@ const router = createRouter({
   ]
 })
 
-// 路由守卫
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
   if (to.meta.requiresAuth && !authStore.isLogin) {
-    // 需要登录但未登录 → 跳转登录
     next('/login')
   } else if (to.meta.guestOnly && authStore.isLogin) {
-    // 已登录用户访问登录页 → 跳转聊天页
     next('/chat')
   } else {
     next()

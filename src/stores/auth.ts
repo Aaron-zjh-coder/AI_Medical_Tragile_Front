@@ -4,14 +4,21 @@ import { ref, computed } from 'vue'
 export interface UserInfo {
   id: string
   name: string
-  // 可根据后端实际字段扩展
+  // 你可以根据后端返回补充字段，比如 email / phone 等
 }
 
+// 可选：如果你的 API 返回更多字段，可以扩展，例如：
+// export interface UserInfo {
+//   id: string
+//   name: string
+//   email?: string
+//   phone?: string
+//   avatar?: string
+// }
+
 export const useAuthStore = defineStore('auth', () => {
-  // 修复点 1: token 初始化
   const token = ref<string | null>(localStorage.getItem('patient_token'))
 
-  // 修复点 2: userInfo 初始化（关键！）
   const savedUserInfo = localStorage.getItem('patient_user_info')
   const initialUserInfo: UserInfo | null = savedUserInfo
     ? (JSON.parse(savedUserInfo) as UserInfo)
@@ -34,6 +41,56 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('patient_user_info')
   }
 
+  // 如果你暂时不需要对接真实 API，下面三个方法可以先注释掉
+  // 等有后端接口后再启用
+
+  // ====== 以下为可选：对接后端 API 所需逻辑 ======
+  /*
+  import axios from 'axios'
+
+  const api = axios.create({
+    baseURL: '/api',
+    timeout: 10000,
+  })
+
+  api.interceptors.request.use(config => {
+    if (token.value) {
+      config.headers.Authorization = `Bearer ${token.value}`
+    }
+    return config
+  })
+
+  const performLogin = async (username: string, password: string) => {
+    const res = await api.post<{ token: string; user: UserInfo }>('/auth/login', { username, password })
+    login(res.data.token, res.data.user)
+    return true
+  }
+
+  const performRegister = async (data: { email?: string; phone?: string; password: string; code: string }) => {
+    const res = await api.post<{ token: string; user: UserInfo }>('/auth/register', data)
+    login(res.data.token, res.data.user)
+    return true
+  }
+
+  const sendVerificationCode = async (email?: string, phone?: string) => {
+    await api.post('/auth/send-code', { email, phone })
+    return true
+  }
+
+  return {
+    token,
+    userInfo,
+    isLogin,
+    login,
+    logout,
+    performLogin,
+    performRegister,
+    sendVerificationCode
+  }
+  */
+  // ============================================
+
+  // ⚠️ 如果你还没准备 API，先返回基础方法（无网络请求）
   return {
     token,
     userInfo,
