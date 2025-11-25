@@ -5,56 +5,70 @@
         v-model="inputText"
         placeholder="向我提问"
         :auto-focus="true"
+        :disabled="loading"
         @keydown.enter.exact.prevent="handleSend"
+        style="flex: 1; border-radius: 20px;"
       />
+
       <a-button
         type="primary"
         :disabled="!inputText.trim() || loading"
         @click="handleSend"
-        style="border-radius: 0 8px 8px 0;"
+        style="border-radius: 20px; min-width: 60px;"
       >
-        <template #icon><a-icon type="send" /></template>
+        发送
       </a-button>
     </a-input-group>
-
-    <div class="function-buttons">
-      <a-button type="text" size="small">深度思考</a-button>
-      <a-button type="text" size="small">深度研究</a-button>
-      <a-button type="text" size="small">代码</a-button>
-      <a-button type="text" size="small">翻译</a-button>
-      <a-button type="text" size="small">图像</a-button>
-      <a-button type="text" size="small">...</a-button>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useChatStore } from '@/stores/chat'
+import { ref, defineProps, defineEmits } from 'vue'
 
-const chatStore = useChatStore()
+const { loading } = defineProps<{
+  loading?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'send', text: string): void
+}>()
+
 const inputText = ref('')
-const loading = ref(false)
 
 const handleSend = () => {
   const text = inputText.value.trim()
   if (!text) return
-  chatStore.sendMessage(text)
+  emit('send', text)
   inputText.value = ''
 }
 </script>
 
 <style scoped>
 .input-area {
-  padding: 24px;
-  background-color: white;
-  border-top: 1px solid #e5e7eb;
-}
-
-.function-buttons {
   display: flex;
   gap: 8px;
-  margin-top: 8px;
-  justify-content: center;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.input-area :deep(.arco-input) {
+  border-radius: 20px;
+  border: 1px solid #d9d9d9;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.input-area :deep(.arco-input-group-addon) {
+  background: #1d39c4;
+  color: white;
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.input-area :deep(.arco-input-group-addon):hover {
+  background: #162a91;
 }
 </style>

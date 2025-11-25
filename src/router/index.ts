@@ -8,13 +8,13 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: () => import('@/views/Login/LoginView.vue'),
-      meta: { guestOnly: true } // 未登录才能访问
+      meta: { guestOnly: true }
     },
     {
       path: '/register',
       name: 'Register',
       component: () => import('@/views/Register/RegisterView.vue'),
-      meta: { guestOnly: true } // 未登录才能访问
+      meta: { guestOnly: true }
     },
     {
       path: '/chat',

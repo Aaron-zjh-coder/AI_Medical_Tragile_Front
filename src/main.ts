@@ -5,7 +5,7 @@ import App from './App.vue'
 import router from './router'
 import '@arco-design/web-vue/dist/arco.css'
 
-// 👇 关键：确保 body 样式被强制重置（运行时注入）
+
 const resetStyle = document.createElement('style')
 resetStyle.textContent = `
   html, body {

@@ -6,8 +6,8 @@
       </a-select>
     </div>
     <div class="header-actions">
-      <a-button type="link">下载电脑版</a-button>
-      <a-button type="link">API 服务</a-button>
+      <a-button type="text">下载电脑版</a-button>
+      <a-button type="text">API 服务</a-button>
       <a-button type="text"><a-icon type="user" /></a-button>
     </div>
   </div>

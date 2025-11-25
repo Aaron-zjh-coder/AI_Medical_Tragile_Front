@@ -4,7 +4,7 @@
       :model-value="modelValue"
       @update:model-value="$emit('update:modelValue', $event)"
       placeholder="请输入6位验证码"
-      :max-length="6"
+      maxlength="6"
       allow-clear
       style="width: 200px"
     />
@@ -24,7 +24,7 @@ import { ref, computed, onUnmounted } from 'vue'
 
 const props = defineProps<{
   modelValue: string
-  phone: string
+  contact: string
 }>()
 
 const emit = defineEmits<{
@@ -35,8 +35,12 @@ const emit = defineEmits<{
 const countdown = ref(0)
 let timer: number | null = null
 
+const isEmail = (str: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str)
+const isPhone = (str: string): boolean => /^1[3-9]\d{9}$/.test(str)
+
 const canSend = computed(() => {
-  return /^1[3-9]\d{9}$/.test(props.phone) && countdown.value === 0
+  const trimmed = props.contact.trim()
+  return (isEmail(trimmed) || isPhone(trimmed)) && countdown.value === 0
 })
 
 const buttonText = computed(() => {
@@ -51,11 +55,12 @@ const handleSend = () => {
 
 const startCountdown = () => {
   countdown.value = 60
+  if (timer) clearInterval(timer)
   timer = setInterval(() => {
     if (countdown.value > 0) {
       countdown.value--
     } else {
-      if (timer) clearInterval(timer)
+      clearInterval(timer!)
       timer = null
     }
   }, 1000)

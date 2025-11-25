@@ -1,243 +1,148 @@
 <template>
-  <div class="chat-container">
-    <!-- 主内容区 -->
-    <div class="main-content">
-      <!-- 左侧边栏 -->
-      <div class="sidebar">
-        <a-button type="primary" class="new-chat-btn" @click="startNewChat">新对话</a-button>
-        <div class="profile">
-          <a-avatar src="/avatar.png" size="small" />
-          <span class="profile-name">我的空间</span>
-        </div>
+  <div class="chat-layout">
+    <div class="sidebar">
+      <div class="logo-section">
+        <div class="logo-icon">⚕️</div>
+        <h1 class="logo-text">医疗导诊助手</h1>
       </div>
 
-      <!-- 右侧聊天区 -->
-      <div class="content-area">
-        <!-- 消息列表 -->
-        <div class="message-list">
-          <!-- 欢迎语：仅当无消息时显示 -->
-          <div v-if="messages.length === 0" class="welcome-message">
-            你好，我是医疗导诊AI大模型
-          </div>
+      <div class="new-chat-btn">
+        <a-button type="primary" long @click="startNewChat" size="large">
+          + 新对话
+        </a-button>
+      </div>
+    </div>
 
-          <!-- 渲染所有消息 -->
-          <div
-            v-for="msg in messages"
-            :key="msg.id"
-            class="message"
-            :class="{ 'role-user': msg.role === 'user', 'role-assistant': msg.role === 'assistant' }"
-          >
-            <div class="message-bubble">{{ msg.content }}</div>
-          </div>
-        </div>
+    <div class="chat-main">
+      <ChatMessageList
+        :messages="chatStore.displayMessages"
+        :loading="chatStore.loading"
+      />
 
-        <!-- 输入区域：居中、不贴底、独立 -->
-        <div class="input-wrapper">
-          <div class="input-box-container">
-            <a-textarea
-              v-model="inputValue"
-              placeholder="向我提问..."
-              :auto-size="{ minRows: 1, maxRows: 4 }"
-              class="input-box"
-              @keydown.enter.exact.prevent="sendMessage"
-            />
-            <a-button type="primary" class="send-btn" @click="sendMessage">发送</a-button>
-          </div>
-        </div>
+      <div class="input-float">
+        <ChatInputBox
+          @send="handleSend"
+          :loading="chatStore.loading"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { useChatStore } from '@/stores/chat'
+import ChatMessageList from '@/components/chat/ChatMessageList.vue'
+import ChatInputBox from '@/components/chat/ChatInputBox.vue'
 
-interface Message {
-  id: number
-  role: 'user' | 'assistant'
-  content: string
-}
+const chatStore = useChatStore()
+const { sendMessage, startNewChat } = chatStore
 
-const messages = ref<Message[]>([])
-let nextId = 1
-const inputValue = ref('')
-
-const sendMessage = () => {
-  const text = inputValue.value.trim()
-  if (!text) return
-
-  // 添加用户消息
-  messages.value.push({ id: nextId++, role: 'user', content: text })
-  inputValue.value = ''
-  scrollToBottom()
-
-  // 模拟 AI 回复（后续可替换为真实 API）
-  setTimeout(() => {
-    messages.value.push({
-      id: nextId++,
-      role: 'assistant',
-      content: '感谢您的提问，我会尽快为您解答。'
-    })
-    scrollToBottom()
-  }, 600)
-}
-
-const startNewChat = () => {
-  messages.value = []
-  inputValue.value = ''
-}
-
-const scrollToBottom = () => {
-  nextTick(() => {
-    const list = document.querySelector('.message-list')
-    if (list) {
-      list.scrollTop = list.scrollHeight
-    }
-  })
+const handleSend = (text: string) => {
+  if (!text.trim() || chatStore.loading) return
+  sendMessage(text)
 }
 </script>
 
 <style scoped>
-.chat-container {
+.chat-layout {
   display: flex;
-  flex-direction: column;
   height: 100vh;
-  background-color: #f9fafb;
-}
-
-.main-content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
+  background-color: #f8f9fa;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .sidebar {
-  width: 240px;
+  width: 260px;
   background: white;
-  border-right: 1px solid #e5e5e5;
-  padding: 20px;
+  border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.03);
+  padding: 20px 16px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.03);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 0 8px;
+}
+
+.logo-icon {
+  font-size: 24px;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d39c4;
+  margin: 0;
 }
 
 .new-chat-btn {
-  width: 100%;
-  margin-bottom: 16px;
+  padding: 0 8px;
 }
 
-.profile {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #666;
+.new-chat-btn :deep(.arco-btn) {
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(29, 57, 196, 0.15);
+  transition: all 0.2s;
 }
 
-.content-area {
+.new-chat-btn :deep(.arco-btn):hover {
+  background: #162a91;
+  transform: translateY(-1px);
+}
+
+.chat-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f9fafb;
+  background: #f8f9fa;
   position: relative;
 }
 
-.message-list {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+.input-float {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 0 16px;
 }
 
-/* 欢迎语 - 居中大字 */
-.welcome-message {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1d39c4;
-  text-align: center;
-  max-width: 80%;
-  margin: 0 auto;
-  padding: 24px;
-  background: rgba(240, 245, 255, 0.7);
-  border-radius: 12px;
-  line-height: 1.5;
-  opacity: 1;
-}
-
-/* 消息气泡 */
-.message {
-  display: flex;
-  margin-bottom: 16px;
-  max-width: 80%;
-}
-
-.role-user {
-  justify-content: flex-end;
-}
-
-.role-assistant {
-  justify-content: flex-start;
-}
-
-.message-bubble {
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 14px;
-  line-height: 1.5;
-  word-break: break-word;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.role-user .message-bubble {
-  background: #1890ff;
-  color: white;
-}
-
-.role-assistant .message-bubble {
-  background: #f9fafb;
-  color: #333;
-  border: 1px solid #e5e5e5;
-}
-
-/* 输入区域 */
-.input-wrapper {
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-}
-
-.input-box-container {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-  max-width: 800px;
+.input-float :deep(.arco-input-group) {
   width: 100%;
+  max-width: 600px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: white;
+  border: none;
+  padding: 4px;
 }
 
-.input-box {
-  flex: 1;
-  min-height: 40px;
-  padding: 10px 16px;
+.input-float :deep(.arco-input) {
+  border: none;
+  padding: 8px 16px;
   font-size: 14px;
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
-  resize: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.input-box:focus {
+  border-radius: 20px;
+  flex: 1;
   outline: none;
-  border-color: #1890ff;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
 }
 
-.send-btn {
-  height: 40px;
-  padding: 0 20px;
-  border-radius: 8px;
-  font-weight: 500;
+.input-float :deep(.arco-input-group-addon) {
+  background: #1d39c4;
+  color: white;
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.input-float :deep(.arco-input-group-addon):hover {
+  background: #162a91;
 }
 </style>

@@ -2,18 +2,22 @@
   <div class="login-container">
     <div class="login-card">
       <h2 class="title">医疗导诊系统</h2>
+
       <a-form :model="form" @submit="handleSubmit" layout="vertical">
         <a-form-item
           field="username"
-          label="账号（邮箱/手机号）"
+          label="账号（邮箱或手机号）"
           :rules="[{
             required: true,
             message: '请输入邮箱或手机号'
+          }, {
+            validator: validateUsername,
+            message: '请输入有效的邮箱或手机号'
           }]"
         >
           <a-input
             v-model="form.username"
-            placeholder="请输入邮箱或手机号"
+            placeholder="例如：user@example.com 或 13812345678"
             allow-clear
           />
         </a-form-item>
@@ -57,9 +61,9 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-import type { UserInfo } from '@/stores/auth' // ✅ type-only import
 import { Message } from '@arco-design/web-vue'
+import { useAuthStore } from '@/stores/auth'
+import { loginApi } from '@/api/login'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -70,11 +74,24 @@ const form = reactive({
   password: ''
 })
 
+// 校验是否为有效邮箱或手机号
+const isEmail = (str: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str)
+const isPhone = (str: string): boolean => /^1[3-9]\d{9}$/.test(str)
+
+const validateUsername = (_rule: unknown, value: string): Promise<void> => {
+  const trimmed = value.trim()
+  return trimmed && (isEmail(trimmed) || isPhone(trimmed))
+    ? Promise.resolve()
+    : Promise.reject(new Error('请输入有效的邮箱或手机号'))
+}
+
 const goToRegister = () => {
   router.push('/register')
 }
 
-const handleSubmit = async () => {
+const handleSubmit = async (e: Event) => {
+  e.preventDefault()
+
   const username = form.username.trim()
   const password = form.password.trim()
 
@@ -85,25 +102,50 @@ const handleSubmit = async () => {
 
   loading.value = true
   try {
-    // 安全提取 name，确保结果为 string
-    const rawName = username.includes('@')
-      ? username.split('@')[0]
-      : username
-
-    // 处理可能的 undefined / 空字符串
-    const displayName = (rawName?.trim() ?? '') || '患者'
-
-    const mockUser: UserInfo = {
-      id: 'user-' + Date.now().toString(36),
-      name: displayName // ✅ 现在是 string，不是 string | undefined
-    }
-
-    authStore.login('mock-patient-token-' + Date.now(), mockUser)
+    const res = await loginApi({ username, password })
+    authStore.login(res.token, res.user)
     Message.success('登录成功！')
     router.push('/')
-  } catch (error) {
-    Message.error('登录失败，请检查账号密码')
-    console.error(error)
+  } catch (err) {
+    console.error('登录异常:', err)
+
+    let errorMsg = '登录失败，请检查账号或密码'
+
+    if (err instanceof Error) {
+      errorMsg = err.message
+    }
+
+    else if (
+      typeof err === 'object' &&
+      err !== null &&
+      'response' in err &&
+      err.response &&
+      typeof err.response === 'object'
+    ) {
+      const response = (err as { response: unknown }).response
+      if (
+        typeof response === 'object' &&
+        response !== null &&
+        'data' in response &&
+        response.data
+      ) {
+        const data = (response as { data: unknown }).data
+        if (
+          typeof data === 'object' &&
+          data !== null &&
+          'message' in data &&
+          typeof data.message === 'string'
+        ) {
+          errorMsg = data.message
+        }
+      }
+    }
+
+    else if (typeof err === 'string') {
+      errorMsg = err
+    }
+
+    Message.error(errorMsg)
   } finally {
     loading.value = false
   }
@@ -116,8 +158,8 @@ const handleSubmit = async () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f7fa;
-  padding: 20px;
+  background: url('/images/login-bg.png') no-repeat center center fixed;
+  background-size:  cover;
 }
 
 .login-card {
