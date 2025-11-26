@@ -17,7 +17,6 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  // 👇 添加 server 配置（关键！）
   server: {
     port: 5173,
     proxy: {

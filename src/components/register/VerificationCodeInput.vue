@@ -1,11 +1,12 @@
 <template>
   <div class="code-input-wrapper">
+    <!-- ✅ 修复：使用 :value + @input 显式绑定 -->
     <a-input
-      v-model="localCode"
+      :value="props.code"
+      @input="(value: string) => emit('update:code', value)"
       placeholder="6位数字"
       style="flex: 1;"
       maxlength="6"
-      @input="emit('update:code', $event)"
     />
     <a-button
       type="secondary"
@@ -36,7 +37,7 @@ const emit = defineEmits<{
   (e: 'send-success'): void
 }>()
 
-const localCode = ref(props.code)
+// ✅ 移除了 localCode，完全受控
 const sending = ref(false)
 const countdown = ref(0)
 let timer: number | null = null
