@@ -1,6 +1,10 @@
+export type LoginType = 'PHONE_NUMBER' | 'EMAIL' | 'THIRD_PARTY';
+
 export interface LoginParams {
-  username: string;
-  password: string;
+  loginId: string;
+  credential: string;
+  loginType: LoginType;
+  verifyCode?: string;
 }
 
 export interface User {
