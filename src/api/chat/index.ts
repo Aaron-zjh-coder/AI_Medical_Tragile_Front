@@ -6,16 +6,22 @@ export const chatWithAI = async (
   signal?: AbortSignal
 ): Promise<void> => {
   try {
-    // 构造带 query 参数的 URL
-    const url = new URL('/api/v1/ai/chat', window.location.origin);
-    url.searchParams.set('prompt', prompt);
-    url.searchParams.set('chatId', chatId);
+    // 🔑 1. 从 localStorage（或你的状态管理）获取 token
+    const token = localStorage.getItem('token'); // 👈 根据你实际存的 key 调整
+    if (!token) {
+      throw new Error('用户未登录，请先登录');
+    }
 
-    const response = await fetch(url.toString(), {
-      method: 'GET',
+    const response = await fetch('/api/v1/ai/chat', {
+      method: 'POST',
       headers: {
-        Accept: 'text/html', // ✅ 关键修改：匹配后端 produces
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, // 🔑 2. 添加这一行！
       },
+      body: JSON.stringify({
+        prompt,
+        chatSessionId: chatId,
+      }),
       signal,
     });
 
