@@ -4,9 +4,7 @@
       <h2 class="title">医疗导诊系统</h2>
 
       <a-form :model="form" @submit="handleSubmit" layout="vertical">
-        <a-form-item
-          field="username"
-      label="账号（邮箱/手机号/用户名）"
+        <a-form-item field="username" label="账号（邮箱/手机号/用户名）"
           :rules="[{
             required: true,
             message: '请输入账号'
@@ -238,7 +236,7 @@ const handleSubmit = async (
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: url('/images/login-bg.png') no-repeat center center fixed;
+  background: url('/images/login.jpg') no-repeat center center fixed;
   background-size:  cover;
 }
 
@@ -246,15 +244,25 @@ const handleSubmit = async (
   width: 100%;
   max-width: 400px;
   padding: 32px;
-  background: white;
+  /* 关键修改：设置半透明白色背景 */
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* 阴影可以调整，但通常保留 */
+
+  /* 关键修改：添加毛玻璃模糊效果 */
+  backdrop-filter: blur(10px);
+  /* Webkit 浏览器（如 Safari）兼容性 */
+  -webkit-backdrop-filter: blur(10px);
+
+  /* 可以添加一个轻微的边框，使效果更明显 */
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .title {
   text-align: center;
   font-size: 24px;
   font-weight: 600;
+  /* 为了在毛玻璃背景上更清晰，可以调整标题颜色，例如使用白色或颜色更深的 */
   color: #1d39c4;
   margin-bottom: 28px;
 }
@@ -264,8 +272,10 @@ const handleSubmit = async (
   margin-top: 20px;
 }
 
+/* 调整标签颜色，确保在毛玻璃背景上可见 */
 :deep(.arco-form-item-label) {
   font-weight: 500;
   color: #333;
+  /* 如果背景更深，可能需要改成 color: #fff; 或更亮的颜色 */
 }
 </style>

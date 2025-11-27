@@ -31,17 +31,21 @@ const handleRegisterSuccess = () => {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: url('/images/login-bg.png') no-repeat center center fixed;
-  background-size:  cover;
+  background: url('/images/login.jpg') no-repeat center center fixed;
+  background-size: cover;
 }
 
 .register-card {
   width: 100%;
   max-width: 400px;
   padding: 32px;
-  background: white;
+  /* 毛玻璃效果 */
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .title {
@@ -57,6 +61,7 @@ const handleRegisterSuccess = () => {
   margin-top: 20px;
 }
 
+/* 确保表单标签在半透明背景上清晰可见 */
 :deep(.arco-form-item-label) {
   font-weight: 500;
   color: #333;
