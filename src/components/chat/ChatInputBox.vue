@@ -1,3 +1,4 @@
+<!-- src/components/chat/ChatInputBox.vue -->
 <template>
   <div class="input-area">
     <a-input-group compact>
@@ -9,10 +10,9 @@
         @keydown.enter.exact.prevent="handleSend"
         style="flex: 1; border-radius: 20px;"
       />
-
       <a-button
         type="primary"
-        :disabled="!inputText.trim() || loading"
+        :disabled="!canSend"
         @click="handleSend"
         style="border-radius: 20px; min-width: 60px;"
       >
@@ -23,22 +23,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, computed } from 'vue'
 
-const { loading } = defineProps<{
+const props = defineProps<{
   loading?: boolean
 }>()
 
-const emit = defineEmits<{
-  (e: 'send', text: string): void
-}>()
+// ✅ 使用字符串数组形式，兼容性更好
+const emit = defineEmits(['send'])
 
 const inputText = ref('')
+
+const canSend = computed(() => {
+  return inputText.value.trim().length > 0 && !props.loading
+})
 
 const handleSend = () => {
   const text = inputText.value.trim()
   if (!text) return
-  emit('send', text)
+  emit('send', text) // 正常传递参数
   inputText.value = ''
 }
 </script>
@@ -50,15 +53,14 @@ const handleSend = () => {
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
+  padding: 16px;
 }
-
 .input-area :deep(.arco-input) {
   border-radius: 20px;
   border: 1px solid #d9d9d9;
   padding: 8px 12px;
   font-size: 14px;
 }
-
 .input-area :deep(.arco-input-group-addon) {
   background: #1d39c4;
   color: white;
@@ -67,7 +69,6 @@ const handleSend = () => {
   cursor: pointer;
   transition: background 0.2s;
 }
-
 .input-area :deep(.arco-input-group-addon):hover {
   background: #162a91;
 }
