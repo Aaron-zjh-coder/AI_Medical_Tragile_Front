@@ -6,35 +6,40 @@ export const chatWithAI = async (
   signal?: AbortSignal
 ): Promise<void> => {
   try {
-    const response = await fetch('/api/v1/ai/chat', {
+    // 构造带 query 参数的 URL
+    const url = new URL('/api/v1/ai/chat', window.location.origin);
+    url.searchParams.set('prompt', prompt);
+    url.searchParams.set('chatId', chatId);
+
+    const response = await fetch(url.toString(), {
       method: 'GET',
       headers: {
-        Accept: 'text/plain',
+        Accept: 'text/html', // ✅ 关键修改：匹配后端 produces
       },
       signal,
-    })
+    });
 
     if (!response.ok) {
-      const errorText = await response.text()
-      throw new Error(`HTTP ${response.status}: ${errorText}`)
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
 
     if (!response.body) {
-      throw new Error('ReadableStream not supported')
+      throw new Error('ReadableStream not supported');
     }
 
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder('utf-8')
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
 
     while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      const chunk = decoder.decode(value, { stream: true })
-      onChunk(chunk)
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      onChunk(chunk);
     }
   } catch (error) {
     if ((error as Error).name !== 'AbortError') {
-      onError(error as Error)
+      onError(error as Error);
     }
   }
-}
+};

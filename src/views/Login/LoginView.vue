@@ -185,7 +185,7 @@ const handleSubmit = async (
     })
     authStore.login(res.token, res.user)
     Message.success('登录成功！')
-    router.push('/')
+    router.push('/chat')
   } catch (err) {
     console.error('登录异常:', err)
 

@@ -11,6 +11,10 @@
           + 新对话
         </a-button>
       </div>
+
+      <div class="logout-section">
+        <a-button type="text" status="danger" @click="logout">登出</a-button>
+      </div>
     </div>
 
     <div class="chat-main">
@@ -30,16 +34,25 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth.ts'
 import { useChatStore } from '@/stores/chat'
 import ChatMessageList from '@/components/chat/ChatMessageList.vue'
 import ChatInputBox from '@/components/chat/ChatInputBox.vue'
 
 const chatStore = useChatStore()
+const router = useRouter()
+const authStore = useAuthStore()
 const { sendMessage, startNewChat } = chatStore
 
 const handleSend = (text: string) => {
   if (!text.trim() || chatStore.loading) return
   sendMessage(text)
+}
+
+const logout = async () =>{
+  authStore.logout()
+  router.push('/login')
 }
 </script>
 
@@ -144,5 +157,17 @@ const handleSend = (text: string) => {
 
 .input-float :deep(.arco-input-group-addon):hover {
   background: #162a91;
+}
+
+.logout-section {
+  margin-top: auto; /* 推到 sidebar 底部 */
+  padding: 0 8px;
+  margin-top: 24px;
+}
+
+.logout-section :deep(.arco-btn) {
+  color: #ff4d4f;
+  font-weight: 500;
+  justify-content: flex-start;
 }
 </style>
