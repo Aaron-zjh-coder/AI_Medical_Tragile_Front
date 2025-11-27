@@ -1,32 +1,28 @@
+<!-- src/views/ChatView.vue -->
 <template>
   <div class="chat-layout">
     <div class="sidebar">
       <div class="logo-section">
-        <div class="logo-icon">⚕️</div>
-        <h1 class="logo-text">医疗导诊助手</h1>
-      </div>
-
-      <div class="new-chat-btn">
-        <a-button type="primary" long @click="startNewChat" size="large">
-          + 新对话
+        <div class="logo-left">
+          <div class="logo-icon">⚕️</div>
+          <h1 class="logo-text">医疗导诊助手</h1>
+        </div>
+        <a-button type="text" size="small" @click="logout" class="logout-btn">
+          登出
         </a-button>
       </div>
-
-      <div class="logout-section">
-        <a-button type="text" status="danger" @click="logout">登出</a-button>
-      </div>
+      <ChatSideBar />
     </div>
-
     <div class="chat-main">
       <ChatMessageList
         :messages="chatStore.displayMessages"
         :loading="chatStore.loading"
       />
-
       <div class="input-float">
+        <!-- ✅ 关键：禁用条件包含 !initialized -->
         <ChatInputBox
           @send="handleSend"
-          :loading="chatStore.loading"
+          :loading="chatStore.loading || !chatStore.initialized"
         />
       </div>
     </div>
@@ -34,23 +30,30 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth.ts'
 import { useChatStore } from '@/stores/chat'
+import ChatSideBar from '@/components/chat/ChatSideBar.vue'
 import ChatMessageList from '@/components/chat/ChatMessageList.vue'
 import ChatInputBox from '@/components/chat/ChatInputBox.vue'
 
 const chatStore = useChatStore()
 const router = useRouter()
 const authStore = useAuthStore()
-const { sendMessage, startNewChat } = chatStore
+
+// ✅ 页面加载时初始化会话
+onMounted(() => {
+  chatStore.loadSessions()
+})
 
 const handleSend = (text: string) => {
-  if (!text.trim() || chatStore.loading) return
-  sendMessage(text)
+  console.log('[ChatView] 接收到消息:', text)
+  if (!text.trim()) return
+  chatStore.sendChatMessage(text)
 }
 
-const logout = async () =>{
+const logout = async () => {
   authStore.logout()
   router.push('/login')
 }
@@ -60,114 +63,118 @@ const logout = async () =>{
 .chat-layout {
   display: flex;
   height: 100vh;
-  background-color: #f8f9fa;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #f5f7ff 0%, #eef2ff 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-
 .sidebar {
   width: 260px;
   background: white;
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid #e9edf5;
   display: flex;
   flex-direction: column;
-  padding: 20px 16px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.03);
+  padding: 24px 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(10px);
 }
-
 .logo-section {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
   padding: 0 8px;
 }
-
+.logo-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 .logo-icon {
-  font-size: 24px;
+  font-size: 28px;
+  background: linear-gradient(135deg, #1d39c4 0%, #2a52be 100%);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
 }
-
 .logo-text {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d39c4;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a2b6d;
   margin: 0;
+  letter-spacing: -0.3px;
 }
-
-.new-chat-btn {
-  padding: 0 8px;
+.logout-btn {
+  font-size: 12px;
+  color: #e53e3e !important;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
-
-.new-chat-btn :deep(.arco-btn) {
-  border-radius: 8px;
-  font-weight: 500;
-  box-shadow: 0 2px 6px rgba(29, 57, 196, 0.15);
-  transition: all 0.2s;
+.logout-btn:hover {
+  background-color: #fff5f5;
 }
-
-.new-chat-btn :deep(.arco-btn):hover {
-  background: #162a91;
-  transform: translateY(-1px);
-}
-
 .chat-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #f8f9fa;
+  background: transparent;
   position: relative;
+  overflow: hidden;
 }
-
 .input-float {
   position: absolute;
-  bottom: 24px;
+  bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  padding: 0 16px;
+  padding: 0 20px;
+  width: 100%;
+  max-width: 720px;
 }
-
 .input-float :deep(.arco-input-group) {
   width: 100%;
-  max-width: 600px;
-  border-radius: 20px;
+  border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
   background: white;
-  border: none;
-  padding: 4px;
+  border: 1px solid #e9edf5;
+  transition: box-shadow 0.3s ease;
 }
-
+.input-float :deep(.arco-input-group):focus-within {
+  box-shadow: 0 8px 24px rgba(29, 57, 196, 0.25);
+  border-color: #cbd5ff;
+}
 .input-float :deep(.arco-input) {
   border: none;
-  padding: 8px 16px;
-  font-size: 14px;
-  border-radius: 20px;
+  padding: 12px 20px;
+  font-size: 15px;
+  border-radius: 24px;
   flex: 1;
   outline: none;
+  color: #2d3748;
+  background: transparent;
 }
-
+.input-float :deep(.arco-input::placeholder) {
+  color: #a0aec0;
+}
 .input-float :deep(.arco-input-group-addon) {
-  background: #1d39c4;
+  background: linear-gradient(135deg, #1d39c4 0%, #2a52be 100%);
   color: white;
-  border-radius: 20px;
-  padding: 8px 16px;
+  border-radius: 24px;
+  padding: 12px 24px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 15px;
+  margin: 0 4px;
 }
-
 .input-float :deep(.arco-input-group-addon):hover {
-  background: #162a91;
+  background: linear-gradient(135deg, #162a91 0%, #1d39c4 100%);
+  transform: scale(1.03);
 }
-
-.logout-section {
-  margin-top: auto; /* 推到 sidebar 底部 */
-  padding: 0 8px;
-  margin-top: 24px;
-}
-
-.logout-section :deep(.arco-btn) {
-  color: #ff4d4f;
-  font-weight: 500;
-  justify-content: flex-start;
+.input-float :deep(.arco-input-group-addon):active {
+  transform: scale(1);
 }
 </style>

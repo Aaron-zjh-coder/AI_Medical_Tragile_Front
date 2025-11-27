@@ -1,3 +1,4 @@
+<!-- src/components/chat/ChatMessageList.vue -->
 <template>
   <div ref="containerRef" class="messages">
     <div
@@ -6,9 +7,7 @@
       class="message"
       :class="{ 'message-user': msg.role === 'user', 'message-ai': msg.role === 'assistant' }"
     >
-      <div class="message-bubble">
-        {{ msg.content }}
-      </div>
+      <div class="message-bubble">{{ msg.content }}</div>
     </div>
     <div v-if="loading" class="message message-ai">
       <div class="message-bubble">
@@ -19,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, defineProps } from 'vue'
+import { ref, watch } from 'vue'
 import type { ChatMessage } from '@/api/chat/types'
 
 const props = defineProps<{
@@ -29,9 +28,13 @@ const props = defineProps<{
 
 const containerRef = ref<HTMLDivElement | null>(null)
 
-watch([() => props.messages, () => props.loading], () => {
-  scrollToBottom()
-})
+watch(
+  () => props.messages,
+  () => {
+    scrollToBottom()
+  },
+  { deep: true }
+)
 
 const scrollToBottom = () => {
   if (containerRef.value) {
