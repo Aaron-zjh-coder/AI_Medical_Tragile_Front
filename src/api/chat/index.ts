@@ -7,7 +7,7 @@ export const chatWithAI = async (
 ): Promise<void> => {
   try {
     // 🔑 1. 从 localStorage（或你的状态管理）获取 token
-    const token = localStorage.getItem('token'); // 👈 根据你实际存的 key 调整
+    const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('用户未登录，请先登录');
     }
@@ -16,7 +16,7 @@ export const chatWithAI = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`, // 🔑 2. 添加这一行！
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
         prompt,
