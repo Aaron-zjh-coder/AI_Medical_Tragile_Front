@@ -1,4 +1,3 @@
-<!-- src/components/chat/ChatMessageList.vue -->
 <template>
   <div ref="containerRef" class="messages">
     <div

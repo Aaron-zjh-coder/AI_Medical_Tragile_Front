@@ -6,7 +6,6 @@ export const chatWithAI = async (
   signal?: AbortSignal
 ): Promise<void> => {
   try {
-    // 🔑 1. 从 localStorage（或你的状态管理）获取 token
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('用户未登录，请先登录');

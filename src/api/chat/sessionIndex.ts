@@ -61,8 +61,6 @@ export function sendChatMessage(data: ChatPromptDTO): Promise<string> {
   return request.post<string>('/ai/chat', data, {
     responseType: 'text'
   }).then(res => {
-    // 注意：这个接口返回纯文本，通常不会有 { code } 包装
-    // 如果也有包装，需特殊处理；否则直接返回
     return res.data
   })
 }

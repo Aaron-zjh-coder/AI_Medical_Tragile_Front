@@ -165,9 +165,28 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   function getErrorMessage(error: unknown): string {
-    if (error instanceof Error) return error.message
-    if (typeof error === 'string') return error
-    return '未知错误'
+    if (error instanceof Error) return error.message;
+    if (typeof error === 'string') return error;
+
+    // 安全地检查是否为对象
+    if (error && typeof error === 'object') {
+      // 尝试提取 Axios 错误中的 message
+      const err = error as Record<string, unknown>;
+
+      // 检查 response?.data?.message
+      if (
+        typeof err.response === 'object' &&
+        err.response !== null &&
+        typeof (err.response as Record<string, unknown>).data === 'object' &&
+        (err.response as Record<string, unknown>).data !== null
+      ) {
+        const data = (err.response as Record<string, unknown>).data as Record<string, unknown>;
+        if (typeof data.message === 'string') return data.message;
+        if (typeof data.msg === 'string') return data.msg;
+      }
+    }
+
+    return '系统繁忙，请稍后再试';
   }
 
   return {
