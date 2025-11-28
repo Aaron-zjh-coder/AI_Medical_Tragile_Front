@@ -43,6 +43,7 @@ const scrollToBottom = () => {
 </script>
 
 <style scoped>
+/* ====== 仅新增 flex: 1 和 overflow-y: auto ====== */
 .messages {
   flex: 1;
   overflow-y: auto;
@@ -51,13 +52,17 @@ const scrollToBottom = () => {
   flex-direction: column;
   gap: 24px;
 }
+/* ============================================== */
+
 .message {
   display: flex;
   justify-content: flex-start;
 }
+
 .message-user {
   justify-content: flex-end;
 }
+
 .message-bubble {
   max-width: 70%;
   padding: 12px 16px;
@@ -66,11 +71,13 @@ const scrollToBottom = () => {
   line-height: 1.5;
   word-break: break-word;
 }
+
 .message-user .message-bubble {
   background-color: #165dff;
   color: white;
   border-bottom-right-radius: 4px;
 }
+
 .message-ai .message-bubble {
   background-color: white;
   color: #1d2129;

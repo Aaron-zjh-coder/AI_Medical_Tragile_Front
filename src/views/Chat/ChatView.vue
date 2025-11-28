@@ -1,4 +1,3 @@
-<!-- src/views/ChatView.vue -->
 <template>
   <div class="chat-layout">
     <div class="sidebar">
@@ -18,8 +17,8 @@
         :messages="chatStore.displayMessages"
         :loading="chatStore.loading"
       />
+      <!-- 保留 .input-float 结构，但改为正常流 -->
       <div class="input-float">
-        <!-- ✅ 关键：禁用条件包含 !initialized -->
         <ChatInputBox
           @send="handleSend"
           :loading="chatStore.loading || !chatStore.initialized"
@@ -42,7 +41,6 @@ const chatStore = useChatStore()
 const router = useRouter()
 const authStore = useAuthStore()
 
-// ✅ 页面加载时初始化会话
 onMounted(() => {
   chatStore.loadSessions()
 })
@@ -66,6 +64,7 @@ const logout = async () => {
   background: linear-gradient(135deg, #f5f7ff 0%, #eef2ff 100%);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
 .sidebar {
   width: 260px;
   background: white;
@@ -76,6 +75,7 @@ const logout = async () => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   backdrop-filter: blur(10px);
 }
+
 .logo-section {
   display: flex;
   justify-content: space-between;
@@ -83,11 +83,13 @@ const logout = async () => {
   margin-bottom: 32px;
   padding: 0 8px;
 }
+
 .logo-left {
   display: flex;
   align-items: center;
   gap: 14px;
 }
+
 .logo-icon {
   font-size: 28px;
   background: linear-gradient(135deg, #1d39c4 0%, #2a52be 100%);
@@ -99,6 +101,7 @@ const logout = async () => {
   justify-content: center;
   color: white;
 }
+
 .logo-text {
   font-size: 20px;
   font-weight: 700;
@@ -106,33 +109,34 @@ const logout = async () => {
   margin: 0;
   letter-spacing: -0.3px;
 }
+
 .logout-btn {
   font-size: 12px;
   color: #e53e3e !important;
   padding: 4px 8px;
   border-radius: 6px;
 }
+
 .logout-btn:hover {
   background-color: #fff5f5;
 }
+
+/* ====== 仅新增以下 3 行，解决布局问题 ====== */
 .chat-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: transparent;
-  position: relative;
-  overflow: hidden;
 }
+/* ========================================= */
+
 .input-float {
-  position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  padding: 0 20px;
+  /* 移除 position: absolute，改为正常流 */
+  padding: 0 20px 32px;
   width: 100%;
   max-width: 720px;
+  margin: 0 auto;
 }
+
 .input-float :deep(.arco-input-group) {
   width: 100%;
   border-radius: 24px;
@@ -142,10 +146,12 @@ const logout = async () => {
   border: 1px solid #e9edf5;
   transition: box-shadow 0.3s ease;
 }
+
 .input-float :deep(.arco-input-group):focus-within {
   box-shadow: 0 8px 24px rgba(29, 57, 196, 0.25);
   border-color: #cbd5ff;
 }
+
 .input-float :deep(.arco-input) {
   border: none;
   padding: 12px 20px;
@@ -156,9 +162,11 @@ const logout = async () => {
   color: #2d3748;
   background: transparent;
 }
+
 .input-float :deep(.arco-input::placeholder) {
   color: #a0aec0;
 }
+
 .input-float :deep(.arco-input-group-addon) {
   background: linear-gradient(135deg, #1d39c4 0%, #2a52be 100%);
   color: white;
@@ -170,10 +178,12 @@ const logout = async () => {
   font-size: 15px;
   margin: 0 4px;
 }
+
 .input-float :deep(.arco-input-group-addon):hover {
   background: linear-gradient(135deg, #162a91 0%, #1d39c4 100%);
   transform: scale(1.03);
 }
+
 .input-float :deep(.arco-input-group-addon):active {
   transform: scale(1);
 }
